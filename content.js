@@ -137,9 +137,57 @@ function setupFastSaveObserver() {
   });
 }
 
+// 添加页面类型检测函数
+function isHomePage() {
+  const url = window.location.href;
+
+  // B站首页判断
+  if (url.includes("bilibili.com")) {
+    // B站首页URL模式
+    return (
+      url === "https://www.bilibili.com/" ||
+      url === "https://bilibili.com/" ||
+      url.match(/^https?:\/\/(www\.)?bilibili\.com\/?(\?.*)?$/)
+    );
+  }
+
+  // YouTube首页判断
+  if (url.includes("youtube.com")) {
+    // YouTube首页URL模式
+    return (
+      url === "https://www.youtube.com/" ||
+      url === "https://youtube.com/" ||
+      url.match(/^https?:\/\/(www\.)?youtube\.com\/?(\?.*)?$/)
+    );
+  }
+
+  return false;
+}
+
+// 修改安全执行函数，添加首页检测逻辑
+function safeExecution(fn, ...args) {
+  // 只在首页执行视频提取
+  if (!isHomePage()) {
+    console.log("视频信息缓存助手: 非首页，停止缓存");
+    return;
+  }
+
+  if (isExtensionContextValid()) {
+    return fn.apply(this, args);
+  }
+}
+
 // 在页面加载完成后执行初始提取
 window.addEventListener("load", () => {
-  console.log("视频信息缓存助手: 页面加载完成，准备提取视频信息");
+  console.log("视频信息缓存助手: 页面加载完成，检查是否为首页");
+
+  // 检查是否为首页
+  if (!isHomePage()) {
+    console.log("视频信息缓存助手: 非首页，不初始化提取功能");
+    return;
+  }
+
+  console.log("视频信息缓存助手: 检测到首页，准备提取视频信息");
 
   // 立即执行一次提取，确保基本视频信息被捕获
   setTimeout(() => safeExecution(extractVideoInfo), 300);
@@ -203,8 +251,14 @@ function setupPageExitListeners() {
   }, 5000); // 每5秒检查一次
 }
 
-// 设置针对特定目标容器的观察器
+// 修改setupTargetedContentObservers函数，在设置观察器前检查是否为首页
 function setupTargetedContentObservers() {
+  // 首先检查是否为首页
+  if (!isHomePage()) {
+    console.log("视频信息缓存助手: 非首页，不设置内容监听");
+    return;
+  }
+
   console.log("视频信息缓存助手: 设置针对性内容监听");
 
   // 记录找到的容器元素，用于调试
@@ -424,6 +478,11 @@ function setupTargetedContentObservers() {
 
   let scrollTimeout;
   window.addEventListener("scroll", () => {
+    // 先检查是否为首页
+    if (!isHomePage()) {
+      return; // 非首页则直接返回，不处理滚动事件
+    }
+
     if (scrollTimeout) clearTimeout(scrollTimeout);
 
     scrollTimeout = setTimeout(() => {
@@ -432,6 +491,11 @@ function setupTargetedContentObservers() {
   });
 
   document.addEventListener("visibilitychange", () => {
+    // 检查是否为首页
+    if (!isHomePage()) {
+      return; // 非首页则直接返回
+    }
+
     if (document.visibilityState === "visible") {
       console.log("视频信息缓存助手: 页面变为可见，检查是否有新内容");
 
@@ -999,10 +1063,30 @@ function isExtensionContextValid() {
   }
 }
 
-// 安全执行函数
-function safeExecution(fn, ...args) {
-  if (isExtensionContextValid()) {
-    return fn.apply(this, args);
+// 添加缺失的基础视频提取函数
+function extractVideoInfo() {
+  // 检查是否为首页
+  if (!isHomePage()) {
+    console.log("视频信息缓存助手: 非首页，不提取视频信息");
+    return;
+  }
+
+  console.log("视频信息缓存助手: 执行页面视频提取");
+
+  try {
+    // 检测当前网站类型
+    if (location.href.includes("bilibili.com")) {
+      // B站提取逻辑
+      extractBilibiliV8Videos();
+    } else if (
+      location.href.includes("youtube.com") ||
+      location.href.includes("youtu.be")
+    ) {
+      // YouTube提取逻辑
+      extractYouTubeTargetedVideos();
+    }
+  } catch (error) {
+    console.error("视频信息缓存助手: 视频提取出错", error);
   }
 }
 
@@ -1169,9 +1253,6 @@ function extractBilibiliV8Videos() {
         processV8Container(backupContainer);
         return;
       }
-
-      extractBilibiliRecommendations();
-      return;
     }
 
     console.log(
@@ -1199,7 +1280,6 @@ function extractYouTubeTargetedVideos() {
 
     if (!ytGridContainer) {
       console.log("视频信息缓存助手: 未找到YouTube网格容器，尝试备用方法");
-      extractYouTubeRecommendations();
       return;
     }
 
@@ -1250,88 +1330,6 @@ function extractYouTubeTargetedVideos() {
     extractYouTubeGridVideos(richItems, richItems.length);
   } catch (error) {
     console.error("视频信息缓存助手: 提取YouTube目标容器视频出错:", error);
-  }
-}
-
-// 添加缺失的基础视频提取函数
-function extractVideoInfo() {
-  console.log("视频信息缓存助手: 执行页面视频提取");
-
-  try {
-    // 检测当前网站类型
-    if (location.href.includes("bilibili.com")) {
-      // B站提取逻辑
-      extractBilibiliV8Videos();
-      // 提取推荐视频
-      extractBilibiliRecommendations();
-    } else if (
-      location.href.includes("youtube.com") ||
-      location.href.includes("youtu.be")
-    ) {
-      // YouTube提取逻辑
-      extractYouTubeTargetedVideos();
-      // 提取推荐视频
-      extractYouTubeRecommendations();
-    }
-  } catch (error) {
-    console.error("视频信息缓存助手: 视频提取出错", error);
-  }
-}
-
-// 添加缺失的B站推荐视频提取函数
-function extractBilibiliRecommendations() {
-  console.log("视频信息缓存助手: 提取B站推荐视频");
-
-  // 寻找推荐视频容器
-  const recommendContainers = [
-    document.querySelector(".recommend-list"),
-    document.querySelector(".rec-list"),
-    document.querySelector(".video-page-card-small"),
-    document.querySelector("[class*='recommend']"),
-  ].filter(Boolean);
-
-  if (recommendContainers.length === 0) {
-    console.log("视频信息缓存助手: 未找到B站推荐视频容器");
-    return;
-  }
-
-  // 处理找到的容器
-  for (const container of recommendContainers) {
-    const videoLinks = container.querySelectorAll('a[href*="/video/"]');
-    if (videoLinks.length > 0) {
-      console.log(
-        `视频信息缓存助手: 找到 ${videoLinks.length} 个B站推荐视频链接`
-      );
-      extractCardsAndSave(Array.from(videoLinks));
-    }
-  }
-}
-
-// 添加缺失的YouTube推荐视频提取函数
-function extractYouTubeRecommendations() {
-  console.log("视频信息缓存助手: 提取YouTube推荐视频");
-
-  // 寻找推荐视频容器
-  const recommendContainers = [
-    document.querySelector("ytd-watch-next-secondary-results-renderer"),
-    document.querySelector("#related"),
-    document.querySelector("#secondary"),
-  ].filter(Boolean);
-
-  if (recommendContainers.length === 0) {
-    console.log("视频信息缓存助手: 未找到YouTube推荐视频容器");
-    return;
-  }
-
-  // 处理找到的容器
-  for (const container of recommendContainers) {
-    const thumbnailLinks = container.querySelectorAll("a#thumbnail");
-    if (thumbnailLinks.length > 0) {
-      console.log(
-        `视频信息缓存助手: 找到 ${thumbnailLinks.length} 个YouTube推荐视频链接`
-      );
-      extractYouTubeBackupElements(thumbnailLinks);
-    }
   }
 }
 

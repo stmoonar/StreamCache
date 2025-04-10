@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "我的视频哪去了",
-  "version": "0.0.4",
-  "description": "自动缓存BiliBili和YouTube视频信息，方便后续查看",
+  "version": "0.0.5",
+  "description": "自动缓存BiliBili和YouTube首页视频信息，方便后续查看",
   "permissions": ["storage", "tabs", "scripting", "webNavigation"],
   "host_permissions": [
     "*://*.bilibili.com/*",
