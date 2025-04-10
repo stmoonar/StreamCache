@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "我的视频哪去了",
+  "version": "0.0.4",
+  "description": "自动缓存BiliBili和YouTube视频信息，方便后续查看",
+  "permissions": ["storage", "tabs", "scripting", "webNavigation"],
+  "host_permissions": [
+    "*://*.bilibili.com/*",
+    "*://*.youtube.com/*",
+    "*://*.youtu.be/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://*.bilibili.com/*", "*://*.youtube.com/*", "*://*.youtu.be/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

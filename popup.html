@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的视频哪去了</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>我的视频哪去了</h1>
+      <div class="cache-info">
+        已缓存视频：<span id="cache-count">0</span> 条
+        (<span id="bilibili-count">0</span> BiliBili / <span id="youtube-count">0</span> YouTube)
+      </div>
+      <div class="tabs">
+        <button class="tab active" data-tab="videos">视频列表</button>
+        <button class="tab" data-tab="settings">设置</button>
+      </div>
+    </header>
+
+    <!-- 视频列表页 -->
+    <div class="tab-content" id="videos" style="display: block;">
+      <div class="toolbar">
+        <div class="search-box">
+          <input type="text" id="search-input" placeholder="搜索视频标题...">
+        </div>
+        <div class="filter-buttons">
+          <button class="filter-btn active" data-filter="all">全部</button>
+          <button class="filter-btn" data-filter="bilibili">BiliBili</button>
+          <button class="filter-btn" data-filter="youtube">YouTube</button>
+        </div>
+      </div>
+      <div class="video-list" id="video-list">
+        <!-- 视频项将在JavaScript中动态生成 -->
+        <div class="empty-message">正在加载...</div>
+      </div>
+    </div>
+
+    <!-- 设置页 -->
+    <div class="tab-content" id="settings" style="display: none;">
+      <form id="settings-form" class="settings-form">
+        <div class="form-group">
+          <label for="max-cache-bilibili">BiliBili最大缓存数量：</label>
+          <input type="number" id="max-cache-bilibili" min="10" max="500" step="10">
+          <span class="form-hint">设置最多缓存多少条BiliBili视频记录</span>
+        </div>
+
+        <div class="form-group">
+          <label for="max-cache-youtube">YouTube最大缓存数量：</label>
+          <input type="number" id="max-cache-youtube" min="10" max="500" step="10">
+          <span class="form-hint">设置最多缓存多少条YouTube视频记录</span>
+        </div>
+
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="auto-clear">
+            自动清除过期视频
+          </label>
+          <span class="form-hint">启用后，将自动清除指定天数前的视频</span>
+        </div>
+
+        <div class="form-group">
+          <label for="clear-interval">清除间隔（天）：</label>
+          <input type="number" id="clear-interval" min="1" max="30">
+          <span class="form-hint">设置多少天前的视频自动清除</span>
+        </div>
+
+        <!-- 添加快速保存模式选项 -->
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="fast-save-mode">
+            启用快速保存模式
+          </label>
+          <span class="form-hint">开启后，使用增强型保存逻辑，确保即使快速刷新也能保存视频信息，推荐开启</span>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" id="save-settings">保存设置</button>
+          <button type="button" id="reset-settings">重置设置</button>
+        </div>
+
+        <div class="cache-actions">
+          <h3>缓存管理</h3>
+          <div class="cache-buttons">
+            <button type="button" id="clear-cache" class="danger-btn">清空所有缓存</button>
+            <button type="button" id="clear-bilibili" class="warning-btn">清空BiliBili缓存</button>
+            <button type="button" id="clear-youtube" class="warning-btn">清空YouTube缓存</button>
+          </div>
+          <span class="form-hint danger-hint">注意：清空操作不可恢复，请谨慎使用</span>
+        </div>
+      </form>
+    </div>
+
+    <footer>
+      <div>我的视频哪去了 v0.0.4</div>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>
