@@ -11,27 +11,27 @@ const DEFAULT_SETTINGS = {
 
 // 初始化设置
 chrome.runtime.onInstalled.addListener(() => {
-  // 初始化设置
-  chrome.storage.local.get("settings", (data) => {
-    if (!data.settings) {
-      chrome.storage.local.set({ settings: DEFAULT_SETTINGS });
-    } else {
-      // 迁移旧设置到新格式
-      const oldSettings = data.settings;
-      const newSettings = {
-        maxCacheBilibili: oldSettings.maxCache || 100,
-        maxCacheYouTube: oldSettings.maxCache || 100,
-        autoClear:
-          oldSettings.autoClear !== undefined ? oldSettings.autoClear : true,
-        clearInterval: oldSettings.clearInterval || 7,
-        fastSaveMode:
-          oldSettings.fastSaveMode !== undefined
-            ? oldSettings.fastSaveMode
-            : true,
-      };
-      chrome.storage.local.set({ settings: newSettings });
-    }
-  });
+//   // 初始化设置
+//   chrome.storage.local.get("settings", (data) => {
+//     if (!data.settings) {
+//       chrome.storage.local.set({ settings: DEFAULT_SETTINGS });
+//     } else {
+//       // 迁移旧设置到新格式
+//       const oldSettings = data.settings;
+//       const newSettings = {
+//         maxCacheBilibili: oldSettings.maxCache || 100,
+//         maxCacheYouTube: oldSettings.maxCache || 100,
+//         autoClear:
+//           oldSettings.autoClear !== undefined ? oldSettings.autoClear : true,
+//         clearInterval: oldSettings.clearInterval || 7,
+//         fastSaveMode:
+//           oldSettings.fastSaveMode !== undefined
+//             ? oldSettings.fastSaveMode
+//             : true,
+//       };
+//       chrome.storage.local.set({ settings: newSettings });
+//     }
+//   });
 
   // 初始化视频缓存和临时缓存区
   chrome.storage.local.get(["videoCache", "tempVideoData"], (data) => {
